@@ -4,145 +4,25 @@
     <title>Image Loader</title>
   </head>
   <body>
+    <div>
+      <h1>Pixel Meter</h1>
+    </div>
     <div style="padding-bottom: 10px">
       <input type="file" id="imageInput" accept="image/*" />
-      <input id="distance" type="text" placeholder="Distance" />
-      <input id="equivalence" type="text" placeholder="Equivalence (cm)" />
-      <button id="lockEquivalence">Lock Equivalence</button>
+    </div>
+    <div style="padding-bottom: 10px">
+      <input id="distance" type="text" placeholder="Distance" disabled />
+      <input id="reference" type="text" placeholder="Reference (m)" disabled />
+      <button id="lockReference">Lock Reference</button>
+    </div>
+    <div style="padding-bottom: 10px">
+      <button id="restart">Clear</button>
     </div>
     <div>
       <canvas id="imageCanvas" width="10" height="10"></canvas>
     </div>
 
-    <script>
-      // Get references to the input and canvas elements
-      const LINE_COLOR = "yellow";
-      const imageInput = document.getElementById("imageInput");
-      const canvas = document.getElementById("imageCanvas");
-      const context = canvas.getContext("2d");
-      const img = new Image();
-
-      let clicked = false;
-      let initialOffset = { x: 0, y: 0 };
-      let lockEquivalence = false;
-      // Add an event listener to the input field to handle image selection
-      imageInput.addEventListener("change", handleImage);
-
-      let isDrawing = false;
-      let startX = 0;
-      let startY = 0;
-
-      const calculateEquivalentValue = ({
-        calculated,
-        equivalenceValue,
-        locked,
-      }) => {
-        return locked ? ((calculated * equivalenceValue) / locked).toFixed(2) : 0;
-      };
-
-      document
-        .getElementById("lockEquivalence")
-        .addEventListener("click", function () {
-          lockEquivalence = !lockEquivalence;
-          alert("The distance has been locked!");
-          if (lockEquivalence) {
-            document.getElementById('lockEquivalence').innerHTML = "Unlock Equivalence"
-            document.getElementById('distance').disabled = true;
-            document.getElementById('equivalence').disabled = true;
-          } else {
-            document.getElementById('lockEquivalence').innerHTML = "Lock Equivalence"
-            document.getElementById('distance').disabled = false;
-            document.getElementById('equivalence').disabled = false;
-          }
-          
-        });
-
-      canvas.addEventListener("mousedown", (e) => {
-        isDrawing = true;
-        startX = e.offsetX;
-        startY = e.offsetY;
-      });
-
-      canvas.addEventListener("mouseup", (e) => {
-        if (isDrawing) {
-          const endX = e.offsetX;
-          const endY = e.offsetY;
-
-          context.strokeStyle = LINE_COLOR; // Set the line color
-          context.lineWidth = 3; // Set the line width
-
-          context.beginPath();
-          context.moveTo(startX, startY);
-          context.lineTo(endX, endY);
-          context.stroke();
-
-          isDrawing = false;
-        }
-      });
-
-      canvas.addEventListener("mousemove", (event) => {
-        if (isDrawing) {
-          const endX = event.offsetX;
-          const endY = event.offsetY;
-
-          const calculatedX = endX - startX;
-          const calculatedY = endY - startY;
-          const distance = Math.sqrt(Math.pow(calculatedX, 2) + Math.pow(calculatedY, 2))
-
-          const equivalenceDOM = document.getElementById("equivalence");
-          const equivalenceValue = equivalenceDOM.value;
-
-          const text = !lockEquivalence
-            ? `distance: ${distance.toFixed(2)} px`
-            : `distance: ${calculateEquivalentValue({
-                calculated: distance,
-                equivalenceValue,
-                locked: document.getElementById("distance").value,
-              })} cm`;
-          context.clearRect(0, 0, canvas.width, canvas.height);
-          context.drawImage(img, 0, 0, img.width, img.height);
-
-          if (!lockEquivalence) {
-            document.getElementById("distance").value = distance.toFixed(2);
-          }
-
-          context.font = "20px Arial";
-          context.fillStyle = LINE_COLOR;
-          context.fillText(text, endX, endY);
-          drawLine(startX, startY, endX, endY);
-        }
-      });
-
-      function drawLine(x1, y1, x2, y2) {
-        context.strokeStyle = LINE_COLOR; // Set the line color
-        context.lineWidth = 3; // Set the line width
-
-        context.beginPath();
-        context.moveTo(x1, y1);
-        context.lineTo(x2, y2);
-        context.stroke();
-      }
-
-      function handleImage(e) {
-        const reader = new FileReader();
-
-        reader.onload = function (event) {
-          img.onload = function () {
-            // Clear the canvas
-            canvas.width = img.width;
-            canvas.height = img.height;
-
-            context.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Draw the loaded image on the canvas
-            context.drawImage(img, 0, 0, img.width, img.height);
-          };
-
-          img.src = event.target.result;
-        };
-
-        reader.readAsDataURL(e.target.files[0]);
-      }
-    </script>
+    <script src="utils.js"></script>
+    <script src="index.js"></script>
   </body>
 </html>
